@@ -29,6 +29,7 @@ export function useWebRTC() {
   const localStreamRef = useRef(null);
 
   const [isSharing, setIsSharing] = useState(false);
+  const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
   const [shareError, setShareError] = useState(null);
 
@@ -77,6 +78,7 @@ export function useWebRTC() {
     }
 
     localStreamRef.current = stream;
+    setLocalStream(stream);
     setIsSharing(true);
 
     const pc = createPeer();
@@ -106,6 +108,7 @@ export function useWebRTC() {
       peerRef.current = null;
     }
     setIsSharing(false);
+    setLocalStream(null);
     socket.emit('screen-share-stopped');
   }, []);
 
@@ -159,5 +162,5 @@ export function useWebRTC() {
     };
   }, [stopScreenShare]);
 
-  return { isSharing, remoteStream, shareError, startScreenShare, stopScreenShare };
+  return { isSharing, localStream, remoteStream, shareError, startScreenShare, stopScreenShare };
 }

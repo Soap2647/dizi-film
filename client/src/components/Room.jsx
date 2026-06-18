@@ -31,7 +31,7 @@ const EMOJI_COLOR_MAP = {
 };
 
 export default function Room({ roomCode, role, myNickname, onLeave, theme, onThemeChange }) {
-  const { isSharing, remoteStream, shareError, startScreenShare, stopScreenShare } = useWebRTC();
+  const { isSharing, localStream, remoteStream, shareError, startScreenShare, stopScreenShare } = useWebRTC();
   const { playForReaction, playHeartRainSound } = useReactionSound();
   const videoRef     = useRef(null);
   const videoAreaRef = useRef(null);
@@ -46,10 +46,12 @@ export default function Room({ roomCode, role, myNickname, onLeave, theme, onThe
   const [copied,          setCopied]          = useState(false);
   const [isFullscreen,    setIsFullscreen]    = useState(false);
 
-  // Attach remote stream
+  // Attach stream: remote takes priority, fall back to local (sharer preview)
   useEffect(() => {
-    if (videoRef.current && remoteStream) videoRef.current.srcObject = remoteStream;
-  }, [remoteStream]);
+    if (videoRef.current) {
+      videoRef.current.srcObject = remoteStream || localStream || null;
+    }
+  }, [remoteStream, localStream]);
 
   // Peer presence
   useEffect(() => {
@@ -199,8 +201,14 @@ export default function Room({ roomCode, role, myNickname, onLeave, theme, onThe
             onDoubleClick={toggleFullscreen}
             style={flashStyle}
           >
-            {remoteStream ? (
-              <video ref={videoRef} className="remote-video" autoPlay playsInline />
+            {remoteStream || localStream ? (
+              <video
+                ref={videoRef}
+                className="remote-video"
+                autoPlay
+                playsInline
+                muted={!remoteStream && !!localStream}
+              />
             ) : isSharing ? (
               <div className="video-placeholder sharing">
                 <div className="placeholder-icon">📡</div>
