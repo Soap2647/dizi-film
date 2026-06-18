@@ -43,6 +43,12 @@ io.on('connection', (socket) => {
     const code = roomCode.toUpperCase().trim();
     const room = rooms.get(code);
     if (!room) return callback({ success: false, error: 'Oda bulunamadı.' });
+
+    // Remove stale socket IDs that are no longer connected
+    for (const id of room) {
+      if (!io.sockets.sockets.has(id)) room.delete(id);
+    }
+
     if (room.size >= 2) return callback({ success: false, error: 'Oda dolu (max 2 kişi).' });
     room.add(socket.id);
     socket.join(code);
