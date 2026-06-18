@@ -66,7 +66,7 @@ export function useWebRTC() {
     try {
       stream = await navigator.mediaDevices.getDisplayMedia({
         video: { frameRate: { ideal: 30 } },
-        audio: false,
+        audio: true,
       });
     } catch (err) {
       if (err.name === 'NotAllowedError') {
